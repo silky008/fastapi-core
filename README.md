@@ -4,11 +4,11 @@ A REST API built with FastAPI and Python to manage user data.
 
 ## Tech Stack
 
-Python 3.12
-FastAPI
-Uvicorn
-Pydantic
-Git & GitHub
+- Python 3.12
+- FastAPI
+- Uvicorn
+- Pydantic
+- Git & GitHub
 
 ## Purpose
 
@@ -16,9 +16,9 @@ This project demonstrates real-world backend API development using FastAPI, clea
 
 ## Features
 
-Create User
-List Users
-Automatic API documentation (Swagger)
+- Create User
+- List Users
+- Automatic API documentation (Swagger)
 
 ## Run the Project
 
@@ -51,6 +51,6 @@ http://127.0.0.1:8000/docs
 
 ## Roadmap
 
-Update User
-Delete User
-PostgreSQL integration
+- Update User
+- Delete User
+- PostgreSQL integration
