@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from .security  import hash_password, create_access_token, verify_password
+from .security  import hash_password, create_access_token, verify_password, get_current_user
 from .models import User
 from .schemas import UserCreate, UserRead
 from .database import get_db
@@ -22,7 +23,9 @@ def create_user(user: UserCreate, db:Session = Depends(get_db)):
 
 # Get all users
 @router.get("/users/", response_model=list[UserRead])
-def get_users(db:Session = Depends(get_db)):
+def get_users(db:Session = Depends(get_db),
+              user:str=Depends(get_current_user)):
+
     users = db.query(User).all()
     return users
 
@@ -50,10 +53,11 @@ def delete_user(user_id: int,db:Session = Depends(get_db)):
     return {"message": "User deleted"}
 
 @router.post("/login")
-def login(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user.password):
+def login(form_data: OAuth2PasswordRequestForm=Depends(),
+          db:Session=Depends(get_db)):
+    user = db.query(User).filter(User.email == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": user.email})
-    return {"access_token": token}
+    return {"access_token": token, "token_type":"bearer"}
