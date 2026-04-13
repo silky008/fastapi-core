@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+
+from .security  import hash_password, create_access_token, verify_password
 from .models import User
 from .schemas import UserCreate, UserRead
 from .database import get_db
@@ -9,7 +11,9 @@ router = APIRouter()
 # Create user
 @router.post("/users/", response_model=UserRead)
 def create_user(user: UserCreate, db:Session = Depends(get_db)):
-    db_user = User(name=user.name, email=user.email)
+    print("CREATE USER FUNCTION CALLED")
+    db_user = User(name=user.name, email=user.email,password=hash_password(user.password))
+    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -44,3 +48,12 @@ def delete_user(user_id: int,db:Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return {"message": "User deleted"}
+
+@router.post("/login")
+def login(email: str, password: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not verify_password(password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token({"sub": user.email})
+    return {"access_token": token}
